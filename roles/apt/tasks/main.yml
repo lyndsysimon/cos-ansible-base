@@ -1,9 +1,5 @@
 # file: roles/apt/tasks/main.yml
 
-
-- name: Apt | Update the sources list (/etc/apt/sources.list)
-  copy: src=etc_apt_sources.list dest=/etc/apt/sources.list owner=root group=root mode=0644
-
 - name: Apt | Update APT package cache
   apt: update_cache=yes
   sudo: yes
