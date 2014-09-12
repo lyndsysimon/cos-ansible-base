@@ -10,8 +10,8 @@
 - name: Update /etc/hosts
   lineinfile:
     dest: /etc/hosts
-    regexp: "^127.0.0.1"
-    line: "127.0.0.1{{'\t'}}{{hostname_name}}"
+    regexp: "^localhost"
+    line: "localhost{{'\t'}}{{hostname_name}}"
     state: present
   when: hostname_name != ""
 

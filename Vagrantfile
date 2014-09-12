@@ -48,4 +48,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
+  config.vm.define "sentry" do |sentry|
+      box_ip = BOX_IP_ZONE + ".226"
+
+      sentry.vm.box = BOX_IMAGE
+      sentry.vm.network :private_network, ip: box_ip
+
+      if ! File.exists?(".vagrant/machines/sentry/virtualbox/id")
+        system "sed -i '.bck'   '/" + box_ip.gsub('.', '\\.') + "/d' ~/.ssh/known_hosts"
+      end
+
+  end
+
 end

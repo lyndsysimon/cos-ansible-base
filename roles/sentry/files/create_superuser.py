@@ -7,34 +7,61 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'conf'
 USERNAME, PASSWORD, EMAIL = sys.argv[1:]
 
 def main():
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-
-    super_user = User.objects.filter(username=USERNAME)
-
-    if super_user:
-        super_user = super_user[0]
-        super_user.username = USERNAME
-        super_user.password = PASSWORD
-        super_user.email = EMAIL
-        super_user.is_staff = True
-        super_user.is_superuser = True
-        super_user.save()
-
-        sys.exit(0)
-
-    for user in User.objects.filter(is_superuser=True):
-        user.delete(save=True)
-
-    super_user = User.objects.create_user(
-        username=USERNAME,
-        password=PASSWORD,
-        email=EMAIL,
+    # Bootstrap the Sentry environment
+    from sentry.utils.runner import (
+        configure_app,
+        generate_settings,
+        initialize_app,
     )
-    super_user.is_staff = True
-    super_user.is_superuser = True
-    super_user.save()
 
-    sys.exit(0)
+    configure_app(
+        project='sentry',
+        default_config_path='/etc/sentry/conf.py',
+        default_settings='sentry.conf.server',
+        settings_initializer=generate_settings,
+        settings_envvar='SENTRY_CONF',
+        initializer=initialize_app,
+    )
+    # Do something crazy
+    from sentry.models import Team, Project, ProjectKey, User
+
+    admin = User.objects.filter(username='admin')
+    team = Team.objects.filter(name='OSF')
+
+    if admin:
+        admin = admin[0]
+    else:
+        admin = User()
+        admin.username = 'admin'
+        admin.email = 'admin@localhost'
+        admin.is_superuser = True
+        admin.set_password('admin')
+        admin.save()
+
+    if team:
+        team = team[0]
+    else:
+        team = Team()
+        team.name = 'OSF'
+        team.owner = admin[0]
+        team.save()
+
+
+    osf_prod = Project.objects.filter(name='OSF Production')
+    osf_staging = Project.objects.filter(name='OSF Staging')
+
+    if not osf_prod:
+        osf_prod = Project()
+        osf_prod.team = team
+        osf_prod.owner = admin
+        osf_prod.name = 'OSF Production'
+        osf_prod.save()
+
+    if not osf_staging:
+        osf_staging = Project()
+        osf_staging.team = team
+        osf_staging.owner = admin
+        osf_staging.name = 'OSF Staging'
+        osf_staging.save()
 
 main()

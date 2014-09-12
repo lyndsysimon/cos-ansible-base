@@ -86,7 +86,7 @@ DATABASES = {
 ################
 
 # You MUST configure the absolute URI root for Sentry:
-SENTRY_URL_PREFIX = '{{ sentry_url_prefix }}'  # No trailing slash!
+SENTRY_URL_PREFIX = '{{ sentry_url_prefix }}{% if sentry_port %}:{{ sentry_port }}{% endif %}'  # No trailing slash!
 
 # If you're using a reverse proxy, you should enable the X-Forwarded-Proto
 # and X-Forwarded-Host headers, and uncomment the following settings
